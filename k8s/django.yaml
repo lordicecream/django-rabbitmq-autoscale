@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - name: django
+        image: kunalnegi/django-producer
+        env:
+        - name: DJANGO_DEBUG
+          value: "True"
+        - name: DJANGO_ALLOWED_HOSTS
+          value: "*"
+        ports:
+        - containerPort: 8000
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django
+  namespace: demo
+spec:
+  selector:
+    app: django
+  ports:
+  - port: 8000
+    targetPort: 8000
+    nodePort: 30080
+  type: NodePort
